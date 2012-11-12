@@ -11,19 +11,53 @@
 
     function Sample_Doga() {
       Sample_Doga.__super__.constructor.call(this);
+      this.keybind("Z".charCodeAt(0), "a");
       this.preload("image/grand_sample_tex.jpg", "model/boss3.l3c.js");
       this.onload = function() {
-        var cam, ground, player, scene,
+        var b, bo, cam, ground, i, player,
           _this = this;
-        scene = new Scene3D();
-        cam = scene.getCamera();
+        this.scene = new Scene3D();
+        cam = this.scene.getCamera();
         cam.x = 0;
         cam.y = 10;
         cam.z = -20;
+        this.bullets = [];
+        bo = new Sphere(0.2);
+        bo.mesh.setBaseColor([1, 1, 0, 1]);
+        bo.mesh.texture.ambient = [1, 1, 1, 1];
+        bo.mesh.texture.diffuse = [0, 0, 0, 1];
+        for (i = 0; i < 10; i++) {
+          b = bo.clone();
+          b.on("removed", function() {
+            return this.active = false;
+          });
+          b.onenterframe = function() {
+            this.forward(0.6);
+            if (this.age > 100) return this.parentNode.removeChild(this);
+          };
+          b.active = false;
+          this.bullets.push(b);
+        }
+        this.bullets.get = function() {
+          var i, _i, _len, _ref;
+          _ref = _this.bullets;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            i = _ref[_i];
+            if (i.active !== true) {
+              i.active = true;
+              i.age = 0;
+              i.x = player.x;
+              i.y = player.y;
+              i.z = player.z;
+              i.rotation = player.rotation;
+              return i;
+            }
+          }
+        };
         player = new Player();
         player.scale(0.5, 0.5, 0.5);
         player.y = 0.5;
-        scene.addChild(player);
+        this.scene.addChild(player);
         this.timer = new Node();
         this.rootScene.addChild(this.timer);
         ground = new PlaneXZ(40);
@@ -33,7 +67,7 @@
           tex.specular = [0, 0, 0, 1];
           return tex.src = _this.assets["image/grand_sample_tex.jpg"];
         })();
-        scene.addChild(ground);
+        this.scene.addChild(ground);
         this.onenterframe = function() {
           cam.centerX = player.x + player.rotation[8] * 2;
           cam.centerY = 0.5;
@@ -64,7 +98,9 @@
       this.model = this.game.assets["model/boss3.l3c.js"];
       this.addChild(this.model);
       this.walking = false;
+      this.heat = 0;
       this.onenterframe = function() {
+        var b;
         _this.walking = false;
         if (_this.game.input.up) {
           _this.forward(0.3);
@@ -85,14 +121,22 @@
           }
         }
         if (_this.walking) {
-          return _this.game.timer.tl.then(function() {
+          _this.game.timer.tl.then(function() {
             return _this.model.animate("Pose3", 10);
           }).delay(10).then(function() {
             return _this.model.animate("Pose4", 10);
           }).delay(10).loop();
         } else {
-          return _this.game.timer.tl.clear();
+          _this.game.timer.tl.clear();
         }
+        if (_this.game.input.a && _this.heat <= 0) {
+          b = _this.game.bullets.get();
+          if (b.active) {
+            _this.game.scene.addChild(b);
+            _this.heat = 3;
+          }
+        }
+        return _this.heat -= 1;
       };
     }
 

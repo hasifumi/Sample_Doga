@@ -2,49 +2,49 @@ enchant()
 class Sample_Doga extends Game
   constructor:->
     super()
+    @keybind("Z".charCodeAt(0), "a")
     @preload "image/grand_sample_tex.jpg", "model/boss3.l3c.js"
     @onload = ->
-      scene = new Scene3D()
-      cam = scene.getCamera()
+      @scene = new Scene3D()
+      cam = @scene.getCamera()
       cam.x = 0
       cam.y = 10
       cam.z = -20
 
+      @bullets = []
+      bo = new Sphere(0.2)
+      bo.mesh.setBaseColor([1, 1, 0, 1])
+      bo.mesh.texture.ambient = [1, 1, 1, 1]
+      bo.mesh.texture.diffuse = [0, 0, 0, 1]
+      for i in [0...10]
+        b = bo.clone()
+        b.on("removed", ->
+          @active = false
+        )
+        b.onenterframe = ->
+          @forward(0.6)
+          if @age > 100
+            @parentNode.removeChild(@)
+        b.active = false
+        @bullets.push(b)
+      @bullets.get = =>
+        for i in @bullets
+          if i.active isnt true
+            i.active = true
+            i.age = 0
+            i.x = player.x
+            i.y = player.y
+            i.z = player.z
+            i.rotation = player.rotation
+            return i
+          
       player = new Player()
       player.scale(0.5, 0.5, 0.5)
       player.y = 0.5
-      scene.addChild(player)
+      @scene.addChild(player)
 
       @timer = new Node()
       @rootScene.addChild @timer
-
-      #player = @assets["model/boss3.l3c.js"]# {{{
-      #player.scale(0.5, 0.5, 0.5)
-      #player.y = 0.5
-      #player.walking = false
-      #player.onenterframe = =>
-      #  if @input.up
-      #    player.forward(0.3)
-      #    player.walking = true
-      #  else
-      #    if @input.down
-      #      player.forward(-0.3)
-      #      player.walking = true
-      #    else
-      #      player.walking = false
-      #  if @input.left
-      #    player.rotateYaw(0.1)
-      #  else
-      #    if @input.right
-      #      player.rotateYaw(-0.1)
-      #  if player.walking
-      #    if player.age %  10 is 0
-      #      player.animate("Pose3", 5)
-      #    else
-      #      if player.age % 10 is 5
-      #        player.animate("Pose4", 5)
-      #  else
-      #    player.animate("_initialPose", 5)# }}}
 
       ground = new PlaneXZ(40)
       (=>
@@ -52,7 +52,7 @@ class Sample_Doga extends Game
         tex.specular = [0, 0, 0, 1]
         tex.src = @assets["image/grand_sample_tex.jpg"]
       )()
-      scene.addChild(ground)
+      @scene.addChild(ground)
 
       @onenterframe = ->
         #cam.lookAt(player)
