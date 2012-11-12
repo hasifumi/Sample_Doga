@@ -10,36 +10,41 @@ class Sample_Doga extends Game
       cam.y = 10
       cam.z = -20
 
-      #player = new Player()
-      player = @assets["model/boss3.l3c.js"]
+      player = new Player()
       player.scale(0.5, 0.5, 0.5)
       player.y = 0.5
-      player.walking = false
-      player.onenterframe = =>
-        if @input.up
-          player.forward(0.3)
-          player.walking = true
-        else
-          if @input.down
-            player.forward(-0.3)
-            player.walking = true
-          else
-            player.walking = false
-        if @input.left
-          player.rotateYaw(0.1)
-        else
-          if @input.right
-            player.rotateYaw(-0.1)
-        if player.walking
-          if player.age %  10 is 0
-            player.animate("Pose3", 5)
-          else
-            if player.age % 10 is 5
-              player.animate("Pose4", 5)
-        else
-          player.animate("_initialPose", 5)
-
       scene.addChild(player)
+
+      @timer = new Node()
+      @rootScene.addChild @timer
+
+      #player = @assets["model/boss3.l3c.js"]# {{{
+      #player.scale(0.5, 0.5, 0.5)
+      #player.y = 0.5
+      #player.walking = false
+      #player.onenterframe = =>
+      #  if @input.up
+      #    player.forward(0.3)
+      #    player.walking = true
+      #  else
+      #    if @input.down
+      #      player.forward(-0.3)
+      #      player.walking = true
+      #    else
+      #      player.walking = false
+      #  if @input.left
+      #    player.rotateYaw(0.1)
+      #  else
+      #    if @input.right
+      #      player.rotateYaw(-0.1)
+      #  if player.walking
+      #    if player.age %  10 is 0
+      #      player.animate("Pose3", 5)
+      #    else
+      #      if player.age % 10 is 5
+      #        player.animate("Pose4", 5)
+      #  else
+      #    player.animate("_initialPose", 5)# }}}
 
       ground = new PlaneXZ(40)
       (=>
@@ -51,10 +56,10 @@ class Sample_Doga extends Game
 
       @onenterframe = ->
         #cam.lookAt(player)
-        cam.centerX = player.x + player.rotation[8]*5
+        cam.centerX = player.x + player.rotation[8] * 2
         cam.centerY = 0.5
-        cam.centerZ = player.z + player.rotation[10]*5
-        cam.chase(player, -10, 10)
+        cam.centerZ = player.z + player.rotation[10] * 2
+        cam.chase(player, -15, 10)
         cam.y = 5
 
       return

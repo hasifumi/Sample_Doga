@@ -20,38 +20,12 @@
         cam.x = 0;
         cam.y = 10;
         cam.z = -20;
-        player = this.assets["model/boss3.l3c.js"];
+        player = new Player();
         player.scale(0.5, 0.5, 0.5);
         player.y = 0.5;
-        player.walking = false;
-        player.onenterframe = function() {
-          if (_this.input.up) {
-            player.forward(0.3);
-            player.walking = true;
-          } else {
-            if (_this.input.down) {
-              player.forward(-0.3);
-              player.walking = true;
-            } else {
-              player.walking = false;
-            }
-          }
-          if (_this.input.left) {
-            player.rotateYaw(0.1);
-          } else {
-            if (_this.input.right) player.rotateYaw(-0.1);
-          }
-          if (player.walking) {
-            if (player.age % 10 === 0) {
-              return player.animate("Pose3", 5);
-            } else {
-              if (player.age % 10 === 5) return player.animate("Pose4", 5);
-            }
-          } else {
-            return player.animate("_initialPose", 5);
-          }
-        };
         scene.addChild(player);
+        this.timer = new Node();
+        this.rootScene.addChild(this.timer);
         ground = new PlaneXZ(40);
         (function() {
           var tex;
@@ -61,10 +35,10 @@
         })();
         scene.addChild(ground);
         this.onenterframe = function() {
-          cam.centerX = player.x + player.rotation[8] * 5;
+          cam.centerX = player.x + player.rotation[8] * 2;
           cam.centerY = 0.5;
-          cam.centerZ = player.z + player.rotation[10] * 5;
-          cam.chase(player, -10, 10);
+          cam.centerZ = player.z + player.rotation[10] * 2;
+          cam.chase(player, -15, 10);
           return cam.y = 5;
         };
       };
@@ -84,13 +58,47 @@
     __extends(Player, _super);
 
     function Player() {
+      var _this = this;
       this.game = enchant.Game.instance;
       Player.__super__.constructor.call(this);
+      this.model = this.game.assets["model/boss3.l3c.js"];
+      this.addChild(this.model);
+      this.walking = false;
+      this.onenterframe = function() {
+        _this.walking = false;
+        if (_this.game.input.up) {
+          _this.forward(0.3);
+          _this.walking = true;
+        } else {
+          if (_this.game.input.down) {
+            _this.forward(-0.2);
+            _this.walking = true;
+          }
+        }
+        if (_this.game.input.left) {
+          _this.rotateYaw(0.1);
+          _this.walking = true;
+        } else {
+          if (_this.game.input.right) {
+            _this.rotateYaw(-0.1);
+            _this.walking = true;
+          }
+        }
+        if (_this.walking) {
+          return _this.game.timer.tl.then(function() {
+            return _this.model.animate("Pose3", 10);
+          }).delay(10).then(function() {
+            return _this.model.animate("Pose4", 10);
+          }).delay(10).loop();
+        } else {
+          return _this.game.timer.tl.clear();
+        }
+      };
     }
 
     return Player;
 
-  })(Entity);
+  })(Sprite3D);
 
   TitleScene = (function(_super) {
 
