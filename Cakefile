@@ -5,6 +5,7 @@ FILENAME = 'game'
 FILES = [
   'coffee/game.coffee',
   'coffee/player.coffee',
+  'coffee/bullet.coffee',
   'coffee/titleScene.coffee',
 ]
 HTMLFILE = 'index.html'

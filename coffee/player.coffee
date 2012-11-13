@@ -35,7 +35,7 @@ class Player extends Sprite3D
 
       if @game.input.a and @heat <= 0
         b = @game.bullets.get()
-        if b.active
+        if b
           @game.scene.addChild(b)
           @heat = 3
       @heat -= 1

@@ -1,7 +1,8 @@
 (function() {
-  var Player, Sample_Doga, TitleScene,
+  var Bullet, Bullets, Player, Sample_Doga, TitleScene,
     __hasProp = Object.prototype.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   enchant();
 
@@ -14,50 +15,18 @@
       this.keybind("Z".charCodeAt(0), "a");
       this.preload("image/grand_sample_tex.jpg", "model/boss3.l3c.js");
       this.onload = function() {
-        var b, bo, cam, ground, i, player,
+        var cam, ground,
           _this = this;
         this.scene = new Scene3D();
         cam = this.scene.getCamera();
         cam.x = 0;
         cam.y = 10;
         cam.z = -20;
-        this.bullets = [];
-        bo = new Sphere(0.2);
-        bo.mesh.setBaseColor([1, 1, 0, 1]);
-        bo.mesh.texture.ambient = [1, 1, 1, 1];
-        bo.mesh.texture.diffuse = [0, 0, 0, 1];
-        for (i = 0; i < 10; i++) {
-          b = bo.clone();
-          b.on("removed", function() {
-            return this.active = false;
-          });
-          b.onenterframe = function() {
-            this.forward(0.6);
-            if (this.age > 100) return this.parentNode.removeChild(this);
-          };
-          b.active = false;
-          this.bullets.push(b);
-        }
-        this.bullets.get = function() {
-          var i, _i, _len, _ref;
-          _ref = _this.bullets;
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            i = _ref[_i];
-            if (i.active !== true) {
-              i.active = true;
-              i.age = 0;
-              i.x = player.x;
-              i.y = player.y;
-              i.z = player.z;
-              i.rotation = player.rotation;
-              return i;
-            }
-          }
-        };
-        player = new Player();
-        player.scale(0.5, 0.5, 0.5);
-        player.y = 0.5;
-        this.scene.addChild(player);
+        this.bullets = new Bullets();
+        this.player = new Player();
+        this.player.scale(0.5, 0.5, 0.5);
+        this.player.y = 0.5;
+        this.scene.addChild(this.player);
         this.timer = new Node();
         this.rootScene.addChild(this.timer);
         ground = new PlaneXZ(40);
@@ -69,10 +38,10 @@
         })();
         this.scene.addChild(ground);
         this.onenterframe = function() {
-          cam.centerX = player.x + player.rotation[8] * 2;
+          cam.centerX = this.player.x + this.player.rotation[8] * 2;
           cam.centerY = 0.5;
-          cam.centerZ = player.z + player.rotation[10] * 2;
-          cam.chase(player, -15, 10);
+          cam.centerZ = this.player.z + this.player.rotation[10] * 2;
+          cam.chase(this.player, -15, 10);
           return cam.y = 5;
         };
       };
@@ -131,7 +100,7 @@
         }
         if (_this.game.input.a && _this.heat <= 0) {
           b = _this.game.bullets.get();
-          if (b.active) {
+          if (b) {
             _this.game.scene.addChild(b);
             _this.heat = 3;
           }
@@ -143,6 +112,65 @@
     return Player;
 
   })(Sprite3D);
+
+  Bullet = (function(_super) {
+
+    __extends(Bullet, _super);
+
+    function Bullet() {
+      var _this = this;
+      this.game = enchant.Game.instance;
+      Bullet.__super__.constructor.call(this, 0.2);
+      this.mesh.setBaseColor([1, 1, 0, 1]);
+      this.mesh.texture.ambient = [1, 1, 1, 1];
+      this.mesh.texture.diffuse = [0, 0, 0, 1];
+      this.active = false;
+      this.onenterframe = function() {
+        _this.forward(0.6);
+        if (_this.age > 100) return _this.parentNode.removeChild(_this);
+      };
+      this.on("removed", function() {
+        return _this.active = false;
+      });
+    }
+
+    return Bullet;
+
+  })(Sphere);
+
+  Bullets = (function() {
+
+    function Bullets() {
+      this.get = __bind(this.get, this);
+      var b, i;
+      this.game = enchant.Game.instance;
+      this.ary = [];
+      for (i = 0; i < 10; i++) {
+        b = new Bullet();
+        this.ary.push(b);
+      }
+    }
+
+    Bullets.prototype.get = function() {
+      var i, _i, _len, _ref;
+      _ref = this.ary;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        i = _ref[_i];
+        if (i.active !== true) {
+          i.active = true;
+          i.age = 0;
+          i.x = this.game.player.x;
+          i.y = this.game.player.y;
+          i.z = this.game.player.z;
+          i.rotation = this.game.player.rotation;
+          return i;
+        }
+      }
+    };
+
+    return Bullets;
+
+  })();
 
   TitleScene = (function(_super) {
 
