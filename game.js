@@ -1,5 +1,5 @@
 (function() {
-  var Bullet, Bullets, Player, Sample_Doga, TitleScene,
+  var Bullet, Bullets, Enemies, Enemy, Player, Sample_Doga, TitleScene,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -13,7 +13,7 @@
     function Sample_Doga() {
       Sample_Doga.__super__.constructor.call(this);
       this.keybind("Z".charCodeAt(0), "a");
-      this.preload("image/grand_sample_tex.jpg", "model/boss3.l3c.js");
+      this.preload("image/grand_sample_tex.jpg", "model/boss3.l3c.js", "model/robo4.l3p.js");
       this.onload = function() {
         var cam, ground,
           _this = this;
@@ -23,6 +23,7 @@
         cam.y = 10;
         cam.z = -20;
         this.bullets = new Bullets();
+        this.enemies = new Enemies();
         this.player = new Player();
         this.player.scale(0.5, 0.5, 0.5);
         this.player.y = 0.5;
@@ -38,11 +39,22 @@
         })();
         this.scene.addChild(ground);
         this.onenterframe = function() {
-          cam.centerX = this.player.x + this.player.rotation[8] * 2;
+          var e;
+          if (_this.frame % 100 === 0) {
+            e = _this.enemies.get();
+            if (e) {
+              e.x = _this.player.x;
+              e.y = 0.5;
+              e.z = _this.player.z;
+              _this.scene.addChild(e);
+            }
+            console.log("enemy add");
+          }
+          cam.centerX = _this.player.x + _this.player.rotation[8] * 2;
           cam.centerY = 0.5;
-          cam.centerZ = this.player.z + this.player.rotation[10] * 2;
-          cam.chase(this.player, -15, 10);
-          return cam.y = 5;
+          cam.centerZ = _this.player.z + _this.player.rotation[10] * 2;
+          cam.chase(_this.player, -15, 10);
+          return cam.y = 2;
         };
       };
       this.start();
@@ -169,6 +181,61 @@
     };
 
     return Bullets;
+
+  })();
+
+  Enemy = (function(_super) {
+
+    __extends(Enemy, _super);
+
+    function Enemy() {
+      var _this = this;
+      this.game = enchant.Game.instance;
+      Enemy.__super__.constructor.call(this);
+      this.model = this.game.assets["model/robo4.l3p.js"];
+      this.addChild(this.model);
+      this.walking = false;
+      this.active = false;
+      this.onenterframe = function() {
+        _this.forward(-0.3);
+        if (_this.age > 100) return _this.parentNode.removeChild(_this);
+      };
+      this.on("removed", function() {
+        return _this.active = false;
+      });
+    }
+
+    return Enemy;
+
+  })(Sprite3D);
+
+  Enemies = (function() {
+
+    function Enemies() {
+      this.get = __bind(this.get, this);
+      var b, i;
+      this.game = enchant.Game.instance;
+      this.ary = [];
+      for (i = 0; i < 20; i++) {
+        b = new Enemy();
+        this.ary.push(b);
+      }
+    }
+
+    Enemies.prototype.get = function() {
+      var i, _i, _len, _ref;
+      _ref = this.ary;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        i = _ref[_i];
+        if (i.active !== true) {
+          i.active = true;
+          i.age = 0;
+          return i;
+        }
+      }
+    };
+
+    return Enemies;
 
   })();
 
