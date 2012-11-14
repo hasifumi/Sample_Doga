@@ -24,6 +24,8 @@
         cam.z = -20;
         this.bullets = new Bullets();
         this.enemies = new Enemies();
+        console.log("@bullets.length: " + this.bullets.length);
+        console.log("@enemies.length: " + this.enemies.length);
         this.player = new Player();
         this.player.scale(0.5, 0.5, 0.5);
         this.player.y = 0.5;
@@ -39,7 +41,7 @@
         })();
         this.scene.addChild(ground);
         this.onenterframe = function() {
-          var e;
+          var b, e, _i, _j, _len, _len2, _ref, _ref2;
           if (_this.frame % 100 === 0) {
             e = _this.enemies.get();
             if (e) {
@@ -49,6 +51,22 @@
               _this.scene.addChild(e);
             }
             console.log("enemy add");
+          }
+          _ref = _this.bullets.ary;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            b = _ref[_i];
+            if (b.active) {
+              _ref2 = _this.enemies.ary;
+              for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+                e = _ref2[_j];
+                if (e.active) {
+                  if (b.intersect(e)) {
+                    if (b.parentNode) b.parentNode.removeChild(b);
+                    e.damage();
+                  }
+                }
+              }
+            }
           }
           cam.centerX = _this.player.x + _this.player.rotation[8] * 2;
           cam.centerY = 0.5;
@@ -189,21 +207,42 @@
     __extends(Enemy, _super);
 
     function Enemy() {
+      this.damage = __bind(this.damage, this);
       var _this = this;
       this.game = enchant.Game.instance;
       Enemy.__super__.constructor.call(this);
       this.model = this.game.assets["model/robo4.l3p.js"];
       this.addChild(this.model);
-      this.walking = false;
+      this.hp = 5;
       this.active = false;
       this.onenterframe = function() {
-        _this.forward(-0.3);
-        if (_this.age > 100) return _this.parentNode.removeChild(_this);
+        var self, tf, tt;
+        if (_this.age % 60 < 30) {
+          _this.game.timer.tl.clear();
+          return _this.forward(0.2);
+        } else {
+          if (_this.age % 60 === 40) {
+            tt = Math.atan2(_this.game.player.x - _this.x, _this.game.player.z - _this.z);
+            tf = Math.atan2(_this.rotation[8], _this.rotation[10]);
+            self = _this;
+            return _this.game.timer.tl.clear().then(function() {
+              return self.rotationApply(new Quat(0, 1, 0, (tt - tf) / 20));
+            }).delay(2).loop();
+          }
+        }
       };
       this.on("removed", function() {
         return _this.active = false;
       });
     }
+
+    Enemy.prototype.damage = function() {
+      this.hp -= 1;
+      console.log("enemy damaged!");
+      if (this.hp <= 0) {
+        if (this.parentNode) return this.parentNode.removeChild(this);
+      }
+    };
 
     return Enemy;
 
@@ -216,7 +255,7 @@
       var b, i;
       this.game = enchant.Game.instance;
       this.ary = [];
-      for (i = 0; i < 20; i++) {
+      for (i = 0; i < 5; i++) {
         b = new Enemy();
         this.ary.push(b);
       }

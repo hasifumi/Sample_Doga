@@ -13,6 +13,14 @@ class Sample_Doga extends Game
 
       @bullets = new Bullets()
       @enemies = new Enemies()
+      #@enemies.get = ->
+      #  for i in @enemies
+      #    if i.active isnt true
+      #      i.active = true
+      #      i.age = 0
+      #      return i
+      console.log "@bullets.length: "+@bullets.length
+      console.log "@enemies.length: "+@enemies.length
           
       @player = new Player()
       @player.scale(0.5, 0.5, 0.5)
@@ -40,12 +48,16 @@ class Sample_Doga extends Game
             #e.z = Math.random() * 80 - 40
             e.z = @player.z
             @scene.addChild(e)
-          #for ee in e
-          #  ee.x = Math.random() * 80 - 40
-          #  ee.y = 0.5
-          #  ee.z = Math.random() * 80 - 40
-          #  @scene.addChild(ee)
           console.log "enemy add"
+
+        for b in @bullets.ary
+          if b.active
+            for e in @enemies.ary
+              if e.active
+                if b.intersect(e)
+                  if b.parentNode
+                    b.parentNode.removeChild(b)
+                  e.damage()
 
         cam.centerX = @player.x + @player.rotation[8] * 2
         cam.centerY = 0.5
