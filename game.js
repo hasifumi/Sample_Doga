@@ -1,5 +1,5 @@
 (function() {
-  var Bullet, Bullets, Enemies, Enemy, Explosion, Player, Sample_Doga, TitleScene,
+  var Bullet, Bullets, Enemies, Enemy, Explosion, Ground, Player, Sample_Doga, TitleScene,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -28,13 +28,7 @@
         this.player.scale(0.5, 0.5, 0.5);
         this.player.y = 0.5;
         this.scene.addChild(this.player);
-        ground = new PlaneXZ(40);
-        (function() {
-          var tex;
-          tex = ground.mesh.texture;
-          tex.specular = [0, 0, 0, 1];
-          return tex.src = _this.assets["image/grand_sample_tex.jpg"];
-        })();
+        ground = new Ground(40);
         this.scene.addChild(ground);
         this.onenterframe = function() {
           var b, e, exp, _i, _j, _len, _len2, _ref, _ref2;
@@ -58,10 +52,7 @@
                   if (b.intersect(e)) {
                     if (b.parentNode) b.parentNode.removeChild(b);
                     e.damage();
-                    exp = new Explosion(b, 1, 3);
-                    exp.x = e.x;
-                    exp.y = e.y;
-                    exp.z = e.z;
+                    exp = new Explosion(e, 1.1);
                     _this.scene.addChild(exp);
                   }
                 }
@@ -187,7 +178,7 @@
     }
 
     Bullets.prototype.get = function() {
-      var i, _i, _len, _ref;
+      var brot, i, num, _i, _j, _len, _len2, _ref;
       _ref = this.ary;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         i = _ref[_i];
@@ -197,6 +188,15 @@
           i.x = this.game.player.x;
           i.y = this.game.player.y;
           i.z = this.game.player.z;
+          brot = mat4.create();
+          num = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+          for (_j = 0, _len2 = num.length; _j < _len2; _j++) {
+            i = num[_j];
+            console.log("i:" + i);
+            brot[i] = this.game.player.rotation[i];
+          }
+          i.rotation = brot;
+          i.rotateYaw(Math.random() * 0.2 - 0.1);
           return i;
         }
       }
@@ -247,7 +247,7 @@
       this.hp -= 1;
       if (this.hp <= 0) {
         if (this.parentNode) {
-          exp = new Explosion(this, 2);
+          exp = new Explosion(this, 1.3);
           exp.x = this.x;
           exp.y = this.y;
           exp.z = this.z;
@@ -318,6 +318,23 @@
     return Explosion;
 
   })(Sphere);
+
+  Ground = (function(_super) {
+
+    __extends(Ground, _super);
+
+    function Ground(count) {
+      var tex;
+      this.game = enchant.Game.instance;
+      Ground.__super__.constructor.call(this, count);
+      tex = this.mesh.texture;
+      tex.specular = [0, 0, 0, 1];
+      tex.src = this.game.assets["image/grand_sample_tex.jpg"];
+    }
+
+    return Ground;
+
+  })(PlaneXZ);
 
   TitleScene = (function(_super) {
 

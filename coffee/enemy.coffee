@@ -29,7 +29,7 @@ class Enemy extends Sprite3D
     @hp -= 1
     if @hp <= 0
       if @parentNode
-        exp = new Explosion(@, 2)
+        exp = new Explosion(@, 1.3)
         exp.x = @x
         exp.y = @y
         exp.z = @z

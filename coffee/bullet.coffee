@@ -32,10 +32,12 @@ class Bullets
         i.x = @game.player.x
         i.y = @game.player.y
         i.z = @game.player.z
-        #brot = mat4.create()
-        #for i in [0...16]
-        #  brot[i] = @game.player.rotation[i]
-        #i.rotation = brot
+        brot = mat4.create()
+        num = [0..15]
+        for i in num
+          console.log "i:"+i
+          brot[i] = @game.player.rotation[i]
+        i.rotation = brot
         #i.rotation = @game.player.rotation
-        #i.rotateYaw(Math.random() * 0.2 - 0.1)
+        i.rotateYaw(Math.random() * 0.2 - 0.1)
         return i

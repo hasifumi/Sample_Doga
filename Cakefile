@@ -8,6 +8,7 @@ FILES = [
   'coffee/bullet.coffee',
   'coffee/enemy.coffee',
   'coffee/explosion.coffee',
+  'coffee/ground.coffee',
   'coffee/titleScene.coffee',
 ]
 HTMLFILE = 'index.html'
