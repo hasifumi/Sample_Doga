@@ -5,6 +5,8 @@ class Player extends Sprite3D
     @model = @game.assets["model/boss3.l3c.js"]
     @addChild @model
     @walking = false
+    @timer = new Node()
+    @game.rootScene.addChild @timer
     @heat = 0
 
     @onenterframe = =>
@@ -25,13 +27,15 @@ class Player extends Sprite3D
           @walking = true
 
       if @walking
-        @game.timer.tl.then(=>
+        #@game.timer.tl.then(=>
+        @timer.tl.then(=>
           @model.animate("Pose3", 10)
         ).delay(10).then(=>
           @model.animate("Pose4", 10)
         ).delay(10).loop()
       else
-        @game.timer.tl.clear()
+        #@game.timer.tl.clear()
+        @timer.tl.clear()
 
       if @game.input.a and @heat <= 0
         b = @game.bullets.get()
